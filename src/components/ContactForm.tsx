@@ -33,23 +33,39 @@ export default function ContactForm() {
     e.preventDefault();
     setIsSubmitting(true);
     
+    console.log('Form data being submitted:', formData);
+    
     try {
       const response = await fetch('https://unitedglobals.online/submit.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
+        mode: 'cors',
         body: JSON.stringify(formData),
       });
+
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+      
+      const responseText = await response.text();
+      console.log('Response text:', responseText);
 
       if (response.ok) {
         setIsSubmitted(true);
       } else {
-        throw new Error('Form submission failed');
+        throw new Error(`Form submission failed: ${response.status} - ${responseText}`);
       }
     } catch (error) {
       console.error('Error submitting form:', error);
-      alert('দুঃখিত, ফর্ম জমা দিতে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।');
+      
+      // More specific error messages
+      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        alert('নেটওয়ার্ক সমস্যা বা CORS ইস্যু। অনুগ্রহ করে আবার চেষ্টা করুন।');
+      } else {
+        alert(`দুঃখিত, ফর্ম জমা দিতে সমস্যা হয়েছে: ${error.message}`);
+      }
     }
     
     setIsSubmitting(false);
